@@ -94,6 +94,14 @@ func NewProxy(
 			ForceAttemptHTTP2: true,
 		}
 		p.server.TLSConfig = p.TLSConfig
+	} else if p.TargetURL.Scheme == "https" {
+		// Allow proxying to self-signed HTTPS upstreams even when
+		// this proxy itself is not serving TLS.
+		//nolint:gosec // explicit insecure option for self-signed upstreams
+		p.client.Transport = &http.Transport{
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+			ForceAttemptHTTP2: true,
+		}
 	}
 
 	// TODO: Remove next when HTTP2 will support Drop
